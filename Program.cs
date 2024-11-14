@@ -1,107 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+﻿// See https://aka.ms/new-console-template for more information
 
-namespace projeksayur
+
+using System;
+
+public interface ILaukPauk
 {
-    public class Sayur
+    int ID_Produk { get; }
+    string NamaProduk { get; set; }
+    string Deskripsi { get; set; }
+    int Harga { get; set; }
+    int StokProduk { get; set; }
+
+    void TampilkanInformasiProduk();
+    void PerbaruiStok(int jumlah);
+    int Transaksi(int jumlah);
+}
+
+public class Daging : ILaukPauk
+{
+    public int ID_Produk { get; private set; }
+    public string NamaProduk { get; set; }
+    public string Deskripsi { get; set; }
+    public int Harga { get; set; }
+    public int StokProduk { get; set; }
+    private string Jenis { get; } = "Daging";
+
+    public Daging(int idProduk, string namaProduk, string deskripsi, int harga, int stokProduk)
     {
-        public int idProduk { get; private set; }
-        public string namaProduk { get; set; }
-        public string Deskripsi { get; set; }   
-        public int Harga { get; set; }
-        public int StokProduk { get; set; } 
-        public byte[] GambarProduk { get; set; }
+        ID_Produk = idProduk;
+        NamaProduk = namaProduk;
+        Deskripsi = deskripsi;
+        Harga = harga;
+        StokProduk = stokProduk;
+    }
+    public void TampilkanInformasiProduk()
+    {
+        Console.WriteLine($"ID Produk:{ID_Produk}");
+        Console.WriteLine($"Nama Produk:{NamaProduk}");
+        Console.WriteLine($"Deskripsi: {Deskripsi}");
+        Console.WriteLine($"Harga: {Harga}");
+        Console.WriteLine($"Stok: {StokProduk}");
+        Console.WriteLine($"Jenis: {Jenis}");
+        Console.WriteLine("-------------------------------");
 
-        //construktor
-        public Sayur(int idproduk, string namaproduk, string deskripsi, int harga, int stokProduk, byte[] gambarproduk = null)
-        {
-            idProduk = idproduk;
-            namaProduk = namaproduk;
-            Deskripsi = deskripsi;
-            Harga = harga;
-            StokProduk = stokProduk;
-            GambarProduk = gambarproduk;
-        }
-
-        //method untuk menampilkan informasi produk
-        public virtual void TampilkanInfoProduk()
-        {
-            Console.WriteLine($"Id Produk: {idProduk}");
-            Console.WriteLine($"nama produk: {namaProduk}");
-            Console.WriteLine($"Deskripsi :{Deskripsi}");
-            Console.WriteLine($"Harga :{Harga}");
-            Console.WriteLine($"stok produk: {StokProduk}");
-            Console.WriteLine(GambarProduk != null ? "Gambar: Tersedia" : "Gambar: Tidak tersedia");
-        }
-
-        //method untuk mengurangi stok
-        public bool KurangiStok(int jumlah)
-        {
-            if (StokProduk >= jumlah)
-            {
-                StokProduk -= jumlah;
-                Console.WriteLine($"Stok produk {namaProduk} berhasil dikurangi sebanyak {jumlah}. ");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("Stok tidak mencukupi");
-                return false;
-            }
-        }
     }
 
-    //class turunan sayur hijau
-    public class SayurHijau : Sayur
+    public void PerbaruiStok(int jumlah)
     {
-        //construktor untuk sayur hijau
-        public SayurHijau(int idproduk, string namaproduk, string deskripsi, int harga, int stokproduk, byte[] gambarproduk = null)
-            : base(idproduk, namaproduk, deskripsi, harga, stokproduk, gambarproduk)
-        {
-            
-        }
-
-        //override method untuk menampilkan informasi sayur hijau
-        public override void TampilkanInfoProduk()
-        {
-            base.TampilkanInfoProduk();
-            Console.WriteLine("Kategori: Sayur Hijau");
-        }
+        StokProduk = Math.Max(StokProduk + jumlah, 0);
+        Console.WriteLine($"Stok diperbarui, stok saat ini:{StokProduk}");
     }
 
-    //class turunan untuk sayur kuning
-    public class SayurKuning : Sayur
+    public int Transaksi(int jumlah)
     {
-        //constructor untuk sayur kuning
-        public SayurKuning(int idproduk, string namaproduk, string deskripsi, int harga, int stokproduk, byte[] gambarproduk = null)
-            : base(idproduk, namaproduk, deskripsi, harga, stokproduk, gambarproduk)
+        if (jumlah > 0 && jumlah <= StokProduk)
         {
+            int totalHarga = jumlah * Harga;
+            StokProduk -= jumlah;
+            Console.WriteLine($"Transaksi berhasil, dengan total harga: Rp{totalHarga}");
+            Console.WriteLine($"Sisa stok : {StokProduk}");
+            return totalHarga;
         }
-        //override method untuk menampilkan informasi sayur kuning
-        public override void TampilkanInfoProduk()
-        {
-            base.TampilkanInfoProduk();
-            Console.WriteLine("Kategori: Sayur Kuning");
-        }
+        Console.WriteLine("Jumlah stok tidak mencukupi");
+        return 0;
+
     }
 
-    //main program
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            //membuat objek sayurhijau
-            SayurHijau bayam = new SayurHijau(1, "Bayam", "Sayur hijau", 3000, 50);
-            bayam.TampilkanInfoProduk();
-            Console.WriteLine();
+}
 
-            //membuat objek sayurkuning
-            SayurKuning wortel = new SayurKuning(2, "wortel", "sayur kuning", 5000, 30);
-            wortel.TampilkanInfoProduk();
-        }
-    }
+
+public class Tahu : ILaukPauk
+{
+
 }
